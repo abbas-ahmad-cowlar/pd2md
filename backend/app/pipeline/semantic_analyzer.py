@@ -394,9 +394,16 @@ def extract_links(blocks: list[ContentBlock]) -> list[ContentBlock]:
 # Step 4.6 — Footnote Detection
 # ---------------------------------------------------------------------------
 
-# Footnote markers: [1], (1), 1), *, †, ‡, a) — NOT multi-level headings like 1.1.1
+# Footnote markers: [1], (1), 1), *, †, ‡ — NOT multi-level headings like 1.1.1
+# The separator after the marker may be: space, colon, bracket close, or nothing
+# (LaTeX often produces "1This is a footnote" with no separator)
 _FOOTNOTE_PATTERN = re.compile(
-    r'^[\s]*[\[\(]?(\d{1,2}|[*\u2020\u2021\u00a7\u00b6]|[a-z])[\]\)]?[\s:]\s+(.*)',
+    r'^[\s]*(?:\[(\d{1,2})\]|\((\d{1,2})\)|(\d{1,2})[).:\s]|([*\u2020\u2021\u00a7\u00b6]))\s*(.*)',
+    re.DOTALL,
+)
+# Fallback: marker directly attached to text (e.g., "1This is a footnote")
+_FOOTNOTE_ATTACHED_PATTERN = re.compile(
+    r'^[\s]*(\d{1,2})([A-Z].*)',
     re.DOTALL,
 )
 
@@ -408,48 +415,113 @@ def detect_footnotes(blocks: list[ContentBlock], page_height: float) -> list[Con
       - Located in the lower 25% of the page
       - Starts with a number, symbol, or letter marker
       - Typically has smaller font than body text
-      - Often preceded by a horizontal rule (detected as a thin line)
+      - Multi-footnote blocks are split into individual footnote blocks
 
     Args:
         blocks: ContentBlocks for the page.
         page_height: Height of the page.
 
     Returns:
-        Same blocks with footnotes classified.
+        Updated block list with footnotes classified (may be longer if blocks were split).
     """
+    from backend.app.utils.geometry import merge_bboxes
+
     footnote_zone_y = page_height * 0.75  # Bottom 25% of page
+    result: list[ContentBlock] = []
 
     for block in blocks:
         if block.block_type not in (BlockType.PARAGRAPH, BlockType.UNKNOWN):
+            result.append(block)
             continue
         if not block.text_block:
+            result.append(block)
             continue
 
         # Must be in the footnote zone
         if block.bbox.y0 < footnote_zone_y:
+            result.append(block)
             continue
 
-        text = block.text_block.text.strip()
+        # Try to split this block into individual footnotes by checking each line
+        footnote_lines: list[tuple[str, str, list]] = []  # (marker, text, lines)
+        current_marker = None
+        current_text_parts = []
+        current_lines = []
 
-        # Reject if text looks like a numbered heading (e.g., '1.2.1 Title')
-        if re.match(r'^\d+\.\d+', text):
+        for line in block.text_block.lines:
+            line_text = line.text.strip()
+
+            # Check if this line starts a new footnote
+            marker = _extract_footnote_marker(line_text)
+            if marker:
+                # Save previous footnote if any
+                if current_marker is not None:
+                    footnote_lines.append((current_marker, " ".join(current_text_parts), current_lines))
+                current_marker = marker[0]
+                current_text_parts = [marker[1]]
+                current_lines = [line]
+            elif current_marker is not None:
+                # Continuation of current footnote
+                current_text_parts.append(line_text)
+                current_lines.append(line)
+            else:
+                # No footnote detected yet in this block
+                current_lines.append(line)
+
+        # Save last footnote
+        if current_marker is not None:
+            footnote_lines.append((current_marker, " ".join(current_text_parts), current_lines))
+
+        if not footnote_lines:
+            # No footnotes found — keep block as-is
+            result.append(block)
             continue
 
-        match = _FOOTNOTE_PATTERN.match(text)
-        if match:
-            # Additional check: footnote marker should be just a number,
-            # not the start of a multi-part section number
-            marker_end = match.end(1)
-            remaining = text[marker_end:marker_end+2] if marker_end < len(text) else ''
-            if remaining.startswith('.'):
-                continue  # This is "1.2" not a footnote
+        # Create individual footnote blocks
+        for marker, fn_text, fn_lines in footnote_lines:
+            fn_bbox = merge_bboxes([l.bbox for l in fn_lines])
+            fn_block = ContentBlock(
+                block_type=BlockType.FOOTNOTE,
+                bbox=fn_bbox,
+                text_block=TextBlock(lines=fn_lines, bbox=fn_bbox),
+                footnote_id=marker,
+                footnote_text=fn_text.strip(),
+                confidence=0.7,
+            )
+            result.append(fn_block)
 
-            block.block_type = BlockType.FOOTNOTE
-            block.footnote_id = match.group(1)
-            block.footnote_text = match.group(2).strip()
-            block.confidence = 0.7
+    return result
 
-    return blocks
+
+def _extract_footnote_marker(text: str) -> tuple[str, str] | None:
+    """Try to extract a footnote marker from the start of text.
+
+    Returns (marker, remaining_text) or None.
+    """
+    # Reject numbered headings like "1.2.1 Title"
+    if re.match(r'^\d+\.\d+', text):
+        return None
+
+    match = _FOOTNOTE_PATTERN.match(text)
+    if match:
+        marker = match.group(1) or match.group(2) or match.group(3) or match.group(4)
+        fn_text = (match.group(5) or "").strip()
+        if marker and marker.isdigit():
+            marker_end = match.end(3) or match.end(1) or match.end(2)
+            if marker_end and marker_end < len(text) and text[marker_end:marker_end+1] == '.':
+                return None
+        if marker and fn_text:
+            return (marker, fn_text)
+
+    # Fallback: marker attached directly to text (e.g., "1This is a footnote")
+    att_match = _FOOTNOTE_ATTACHED_PATTERN.match(text)
+    if att_match:
+        marker = att_match.group(1)
+        fn_text = att_match.group(2).strip()
+        if fn_text and not fn_text[0].isdigit():
+            return (marker, fn_text)
+
+    return None
 
 
 # ---------------------------------------------------------------------------

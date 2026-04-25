@@ -1,0 +1,170 @@
+[
+  {
+    "file": "01_simple_article.pdf",
+    "pages": 1,
+    "blocks": 10,
+    "time": 0.02,
+    "score": 1.0,
+    "status": "OK"
+  },
+  {
+    "file": "02_multisection_report.pdf",
+    "pages": 2,
+    "blocks": 18,
+    "time": 0.04,
+    "score": 1.0,
+    "status": "OK"
+  },
+  {
+    "file": "03_nested_lists.pdf",
+    "pages": 2,
+    "blocks": 29,
+    "time": 0.02,
+    "score": 1.0,
+    "status": "OK"
+  },
+  {
+    "file": "04_complex_tables.pdf",
+    "pages": 2,
+    "blocks": 42,
+    "time": 0.03,
+    "score": 1.0,
+    "status": "OK"
+  },
+  {
+    "file": "05_two_column.pdf",
+    "pages": 1,
+    "blocks": 4,
+    "time": 0.03,
+    "score": 1.0,
+    "status": "OK"
+  },
+  {
+    "file": "06_bibliography.pdf",
+    "pages": 2,
+    "blocks": 9,
+    "time": 0.04,
+    "score": 1.0,
+    "status": "OK"
+  },
+  {
+    "file": "07_titlepage_abstract.pdf",
+    "pages": 4,
+    "blocks": 22,
+    "time": 0.05,
+    "score": 1.0,
+    "status": "OK"
+  },
+  {
+    "file": "08_figures_captions.pdf",
+    "pages": 2,
+    "blocks": 15,
+    "time": 0.03,
+    "score": 1.0,
+    "status": "OK"
+  },
+  {
+    "file": "09_enum_itemize.pdf",
+    "pages": 2,
+    "blocks": 29,
+    "time": 0.03,
+    "score": 1.0,
+    "status": "OK"
+  },
+  {
+    "file": "10_formatting.pdf",
+    "pages": 1,
+    "blocks": 17,
+    "time": 0.03,
+    "score": 1.0,
+    "status": "OK"
+  },
+  {
+    "file": "11_headers_footers.pdf",
+    "pages": 3,
+    "blocks": 21,
+    "time": 0.03,
+    "score": 1.0,
+    "status": "OK"
+  },
+  {
+    "file": "12_footnotes.pdf",
+    "pages": 1,
+    "blocks": 16,
+    "time": 0.02,
+    "score": 1.0,
+    "status": "OK"
+  },
+  {
+    "file": "13_math_equations.pdf",
+    "pages": 2,
+    "blocks": 55,
+    "time": 0.03,
+    "score": 1.0,
+    "status": "OK"
+  },
+  {
+    "file": "14_code_listings.pdf",
+    "pages": 2,
+    "blocks": 38,
+    "time": 0.03,
+    "score": 1.0,
+    "status": "OK"
+  },
+  {
+    "file": "15_mixed_stress.pdf",
+    "pages": 2,
+    "blocks": 19,
+    "time": 0.03,
+    "score": 1.0,
+    "status": "OK"
+  },
+  {
+    "file": "16_long_paragraphs.pdf",
+    "pages": 2,
+    "blocks": 12,
+    "time": 0.04,
+    "score": 1.0,
+    "status": "OK"
+  },
+  {
+    "file": "18_nested_tables.pdf",
+    "pages": 2,
+    "blocks": 52,
+    "time": 0.03,
+    "score": 1.0,
+    "status": "OK"
+  },
+  {
+    "file": "19_headings.pdf",
+    "pages": 2,
+    "blocks": 23,
+    "time": 0.02,
+    "score": 1.0,
+    "status": "OK"
+  },
+  {
+    "file": "20_definitions.pdf",
+    "pages": 2,
+    "blocks": 28,
+    "time": 0.03,
+    "score": 1.0,
+    "status": "OK"
+  },
+  {
+    "file": "21_hyperlinks.pdf",
+    "pages": 1,
+    "blocks": 7,
+    "time": 0.02,
+    "score": 1.0,
+    "status": "OK"
+  },
+  {
+    "file": "22_full_report.pdf",
+    "pages": 3,
+    "blocks": 41,
+    "time": 0.05,
+    "score": 1.0,
+    "status": "OK"
+  }
+]

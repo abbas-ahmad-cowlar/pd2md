@@ -145,6 +145,49 @@ class TestColumnDetection:
 
         assert columns.num_columns == 1
 
+    def test_two_column_detected_and_ordered(self):
+        """Two-column PDF should be detected and reading order should be left-then-right."""
+        two_col_pdf = Path(__file__).parent.parent.parent / "test_docs" / "pdfs" / "05_two_column.pdf"
+        if not two_col_pdf.exists():
+            pytest.skip("05_two_column.pdf not available")
+
+        doc = fitz.open(str(two_col_pdf))
+        page = doc.load_page(0)
+        from backend.app.pipeline.extractor import extract_page_glyphs
+        glyphs = extract_page_glyphs(page)
+        width, height = page.rect.width, page.rect.height
+        doc.close()
+
+        blocks, _ = assemble(glyphs)
+        columns = detect_columns(blocks, width, height)
+
+        # Should detect 2 columns
+        assert columns.num_columns == 2, f"Expected 2 columns, got {columns.num_columns}"
+        assert len(columns.gutter_positions) == 1
+
+        # Gutter should be in the middle third of the page
+        gutter_x = columns.gutter_positions[0]
+        assert width * 0.3 < gutter_x < width * 0.7, (
+            f"Gutter at {gutter_x:.0f} is outside middle zone [{width*0.3:.0f}, {width*0.7:.0f}]"
+        )
+
+        # Reading order: left column blocks should appear before right column blocks
+        mask = HeaderFooterMask()
+        code_idx = detect_code_blocks(blocks, [])
+        table_regions = []
+        ordered = determine_reading_order(
+            blocks, columns, table_regions, [], code_idx, mask, height,
+        )
+        content = [b for b in ordered if b.block_type not in (BlockType.HEADER, BlockType.FOOTER)]
+        texts = [b.text_block.text[:40] if b.text_block else "" for b in content]
+        full_text = " ".join(texts)
+
+        # "Abstract" should appear before "3 Results" (left col before right col)
+        if "Abstract" in full_text and "3 Results" in full_text:
+            assert full_text.index("Abstract") < full_text.index("3 Results"), (
+                "Left column 'Abstract' should appear before right column '3 Results'"
+            )
+
 
 class TestTableRegionDetection:
     """Step 3.3 — Table Region Detection."""
@@ -208,6 +251,28 @@ class TestCodeBlockDetection:
         code_indices = detect_code_blocks(blocks, vectors)
 
         assert len(code_indices) == 0, "Simple text should have no code blocks"
+
+    def test_latex_code_listing_detected(self):
+        """LaTeX lstlisting code blocks (CMTT font) should be detected as code."""
+        fixture = FIXTURES / "code_listing.pdf"
+        if not fixture.exists():
+            pytest.skip("code_listing.pdf fixture not available")
+
+        blocks, vectors, _, _, _ = _get_page_data("code_listing.pdf")
+        code_indices = detect_code_blocks(blocks, vectors)
+
+        # Should detect at least 2 code blocks (Python + Shell listings)
+        assert len(code_indices) >= 2, (
+            f"Expected ≥2 code blocks from LaTeX listings, got {len(code_indices)}"
+        )
+
+        # Body text paragraph should NOT be code
+        for idx in range(len(blocks)):
+            text = blocks[idx].text.strip() if blocks[idx].lines else ""
+            if "regular body text" in text.lower():
+                assert idx not in code_indices, (
+                    f"Body text paragraph (block {idx}) falsely detected as code"
+                )
 
 
 class TestReadingOrder:

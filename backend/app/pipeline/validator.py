@@ -169,7 +169,8 @@ def _extract_significant_words(text: str) -> list[str]:
     they survived the conversion pipeline.
     """
     # Remove common formatting artifacts
-    text = re.sub(r'[•\-\*\u2022\u2023\xB7]', '', text)
+    # Remove common bullet formatting artifacts (NOT hyphens, which are content)
+    text = re.sub(r'[•\u2022\u2023\xB7]', '', text)
 
     # Split into words and filter
     words = text.split()
@@ -195,11 +196,17 @@ def _normalize_for_comparison(text: str) -> str:
     import unicodedata
     # Normalize unicode (NFC form)
     text = unicodedata.normalize('NFC', text)
+    # Strip Markdown formatting markers (backticks, bold/italic)
+    # so 'writing`1`' becomes 'writing1' and '**bold**' becomes 'bold'
+    text = text.replace('`', '')
+    text = text.replace('**', '')
+    text = text.replace('__', '')
     # Replace curly quotes with straight
     text = text.replace('\u201c', '"').replace('\u201d', '"')
     text = text.replace('\u2018', "'").replace('\u2019', "'")
-    # Replace em/en dashes
+    # Replace em/en dashes and Unicode minus sign
     text = text.replace('\u2014', '-').replace('\u2013', '-')
+    text = text.replace('\u2212', '-')  # Unicode minus sign → ASCII hyphen
     # Replace non-breaking spaces
     text = text.replace('\u00a0', ' ')
     # Common ligatures

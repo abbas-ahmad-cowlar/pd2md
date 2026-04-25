@@ -167,9 +167,33 @@ def _strip_list_marker(text: str) -> str:
 
 
 def _emit_code_block(block: ContentBlock) -> str:
-    """Emit a fenced code block."""
+    """Emit a fenced code block.
+
+    Strips PDF line numbers (e.g., '1 def foo():' → 'def foo():')
+    from code listings that include them.
+    """
     lang = block.code_language or ""
     text = block.text_block.text if block.text_block else ""
+
+    # Strip leading PDF line numbers from each line.
+    # Pattern: line starts with 1-3 digit number followed by space(s) then code.
+    # We only strip if multiple lines have this pattern (to avoid false positives).
+    lines = text.split("\n")
+    numbered_count = sum(1 for l in lines if re.match(r'^\d{1,3}\s+\S', l))
+
+    if numbered_count >= 2 and numbered_count >= len([l for l in lines if l.strip()]) * 0.5:
+        stripped_lines = []
+        for line in lines:
+            m = re.match(r'^\d{1,3}\s+(.*)', line)
+            if m:
+                stripped_lines.append(m.group(1))
+            else:
+                stripped_lines.append(line)
+        text = "\n".join(stripped_lines)
+
+    # Clean up: remove leading/trailing blank lines within the block
+    text = text.strip("\n")
+
     return f"```{lang}\n{text}\n```"
 
 
@@ -393,11 +417,57 @@ def emit_document(
         if page_idx > 0:
             parts.append("")  # Page break gap
 
-        for block in page.blocks:
-            md = emit_block(block)
-            if md:
-                parts.append(md)
-                parts.append("")  # Block separator
+        # Merge consecutive code blocks into single fenced blocks
+        i = 0
+        page_blocks = page.blocks
+        while i < len(page_blocks):
+            block = page_blocks[i]
+
+            if block.block_type == BlockType.CODE_BLOCK:
+                # Collect consecutive code blocks
+                code_group = [block]
+                j = i + 1
+                while j < len(page_blocks) and page_blocks[j].block_type == BlockType.CODE_BLOCK:
+                    code_group.append(page_blocks[j])
+                    j += 1
+
+                # Merge all code texts into a single fenced block
+                lang = ""
+                code_lines = []
+                for cb in code_group:
+                    if cb.code_language and not lang:
+                        lang = cb.code_language
+                    text = cb.text_block.text if cb.text_block else ""
+                    code_lines.extend(text.split("\n"))
+
+                # Strip bare-number-only lines (PDF line counters like "4", "7", "9")
+                code_lines = [l for l in code_lines if not re.match(r'^\s*\d{1,3}\s*$', l)]
+
+                # Strip leading line numbers globally (e.g., "1 def foo():" → "def foo():")
+                numbered_count = sum(1 for l in code_lines if re.match(r'^\d{1,3}\s+\S', l))
+                non_empty = [l for l in code_lines if l.strip()]
+                if numbered_count >= 2 and non_empty and numbered_count >= len(non_empty) * 0.4:
+                    code_lines = [
+                        re.sub(r'^\d{1,3}\s+', '', l) if re.match(r'^\d{1,3}\s+\S', l) else l
+                        for l in code_lines
+                    ]
+
+                # Clean up: remove leading/trailing empty lines
+                while code_lines and not code_lines[0].strip():
+                    code_lines.pop(0)
+                while code_lines and not code_lines[-1].strip():
+                    code_lines.pop()
+                code_text = "\n".join(code_lines)
+
+                parts.append(f"```{lang}\n{code_text}\n```")
+                parts.append("")
+                i = j
+            else:
+                md = emit_block(block)
+                if md:
+                    parts.append(md)
+                    parts.append("")  # Block separator
+                i += 1
 
     # Footnotes at the end
     footnotes = []

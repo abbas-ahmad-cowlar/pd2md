@@ -485,21 +485,28 @@ def detect_code_blocks(
         and v.bbox.area > 500  # Minimum size
     ]
 
+    # First pass: detect code by monospace ratio
+    mono_ratios: dict[int, float] = {}
+
     for idx, block in enumerate(blocks):
         if block.line_count == 0:
             continue
 
-        # Check if all spans are monospace
+        # Check monospace ratio by character count (not span count)
+        # This is more accurate when line-number spans (non-mono) are short
         all_spans = [s for line in block.lines for s in line.spans]
         non_space_spans = [s for s in all_spans if s.text.strip()]
 
         if not non_space_spans:
             continue
 
-        mono_ratio = sum(1 for s in non_space_spans if s.is_monospace) / len(non_space_spans)
+        total_chars = sum(len(s.text.strip()) for s in non_space_spans)
+        mono_chars = sum(len(s.text.strip()) for s in non_space_spans if s.is_monospace)
+        mono_ratio = mono_chars / total_chars if total_chars > 0 else 0
+        mono_ratios[idx] = mono_ratio
 
-        if mono_ratio >= 0.8:
-            # Strong signal: mostly monospace
+        if mono_ratio >= 0.60:
+            # Strong signal: majority of characters are monospace
             code_indices.add(idx)
             continue
 
@@ -507,10 +514,35 @@ def detect_code_blocks(
         for rect in bg_rects:
             if rect.bbox.contains(block.bbox) or (
                 rect.bbox.overlaps(block.bbox)
-                and mono_ratio >= 0.5
+                and mono_ratio >= 0.4
             ):
                 code_indices.add(idx)
                 break
+
+    # Second pass: adjacency propagation
+    # If a block is sandwiched between two code blocks, it's likely also code.
+    # For blocks with some monospace content (≥30%), absorb if between code blocks.
+    # For very short blocks (≤3 chars, e.g., bare line numbers like "4"), absorb
+    # unconditionally if sandwiched — they're likely PDF line numbers.
+    changed = True
+    while changed:
+        changed = False
+        for idx in range(len(blocks)):
+            if idx in code_indices:
+                continue
+            # Check if adjacent blocks (within 2 positions) are code
+            has_code_before = any(i in code_indices for i in range(max(0, idx - 2), idx))
+            has_code_after = any(i in code_indices for i in range(idx + 1, min(len(blocks), idx + 3)))
+            if not (has_code_before and has_code_after):
+                continue
+
+            block_text = blocks[idx].text.strip() if blocks[idx].lines else ""
+            is_short = len(block_text) <= 3
+            has_mono = mono_ratios.get(idx, 0) >= 0.3
+
+            if has_mono or is_short:
+                code_indices.add(idx)
+                changed = True
 
     return code_indices
 

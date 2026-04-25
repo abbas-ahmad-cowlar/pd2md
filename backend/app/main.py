@@ -9,8 +9,11 @@ from __future__ import annotations
 import asyncio
 import logging
 import traceback
+import zipfile
 from pathlib import Path
 from uuid import uuid4
+
+from typing import List
 
 from fastapi import FastAPI, File, HTTPException, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
@@ -40,8 +43,13 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# In-memory job state (no database needed for single-user tool)
+# In-memory state (no database needed for single-user tool)
 jobs: dict[str, dict] = {}
+batches: dict[str, dict] = {}
+
+# Limit concurrent conversions to avoid CPU overload
+_conversion_semaphore = asyncio.Semaphore(3)
+MAX_BATCH_FILES = 20
 
 # ---------------------------------------------------------------------------
 # API Routes
@@ -227,6 +235,163 @@ async def preview_markdown(job_id: str):
 
     content = md_path.read_text(encoding="utf-8")
     return {"content": content, "filename": job["md_filename"]}
+
+
+# ---------------------------------------------------------------------------
+# Batch API Routes
+# ---------------------------------------------------------------------------
+
+
+@app.post("/api/upload-batch")
+async def upload_batch(files: List[UploadFile] = File(...)):
+    """Upload multiple PDF files and start conversion for each."""
+    # Filter to PDFs only
+    pdf_files = [f for f in files if f.filename and f.filename.lower().endswith(".pdf")]
+    if not pdf_files:
+        raise HTTPException(status_code=400, detail="No PDF files provided.")
+    if len(pdf_files) > MAX_BATCH_FILES:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Too many files ({len(pdf_files)}). Maximum: {MAX_BATCH_FILES}.",
+        )
+
+    batch_id = uuid4().hex
+    job_list = []
+
+    for file in pdf_files:
+        content = await file.read()
+        size_mb = len(content) / (1024 * 1024)
+        if size_mb > settings.max_file_size_mb:
+            # Skip oversized files but continue with others
+            continue
+
+        job_id = uuid4().hex
+        job_dir = settings.upload_dir / job_id
+        job_dir.mkdir(parents=True, exist_ok=True)
+        pdf_path = job_dir / file.filename
+        pdf_path.write_bytes(content)
+
+        output_dir = settings.output_dir / job_id
+
+        jobs[job_id] = {
+            "id": job_id,
+            "filename": file.filename,
+            "size_mb": round(size_mb, 2),
+            "status": "queued",
+            "progress": 0,
+            "current_step": "Queued",
+            "pdf_path": str(pdf_path),
+            "output_dir": str(output_dir),
+            "md_filename": None,
+            "result_stats": None,
+            "error": None,
+        }
+
+        job_list.append({
+            "job_id": job_id,
+            "filename": file.filename,
+            "size_mb": round(size_mb, 2),
+        })
+
+        # Start with semaphore-limited concurrency
+        asyncio.create_task(_run_pipeline_throttled(job_id, pdf_path, output_dir))
+
+    if not job_list:
+        raise HTTPException(status_code=400, detail="All files exceeded size limit.")
+
+    batches[batch_id] = {
+        "id": batch_id,
+        "job_ids": [j["job_id"] for j in job_list],
+        "total": len(job_list),
+    }
+
+    return {"batch_id": batch_id, "jobs": job_list}
+
+
+async def _run_pipeline_throttled(job_id: str, pdf_path: Path, output_dir: Path):
+    """Run pipeline with concurrency limiting."""
+    jobs[job_id]["status"] = "queued"
+    jobs[job_id]["current_step"] = "Waiting in queue..."
+    async with _conversion_semaphore:
+        jobs[job_id]["status"] = "processing"
+        await _run_pipeline(job_id, pdf_path, output_dir)
+
+
+@app.get("/api/batches/{batch_id}/status")
+async def get_batch_status(batch_id: str):
+    """Get status of all jobs in a batch."""
+    if batch_id not in batches:
+        raise HTTPException(status_code=404, detail="Batch not found.")
+    batch = batches[batch_id]
+
+    job_statuses = []
+    completed = 0
+    failed = 0
+    total_progress = 0
+
+    for jid in batch["job_ids"]:
+        job = jobs.get(jid, {})
+        status = job.get("status", "unknown")
+        progress = job.get("progress", 0)
+        total_progress += progress
+        if status == "complete":
+            completed += 1
+        elif status == "error":
+            failed += 1
+
+        job_statuses.append({
+            "id": jid,
+            "filename": job.get("filename", ""),
+            "status": status,
+            "progress": progress,
+            "current_step": job.get("current_step", ""),
+            "result_stats": job.get("result_stats"),
+            "error": job.get("error"),
+        })
+
+    total = batch["total"]
+    overall_progress = total_progress / total if total > 0 else 0
+    all_done = (completed + failed) >= total
+
+    return {
+        "batch_id": batch_id,
+        "total": total,
+        "completed": completed,
+        "failed": failed,
+        "overall_progress": round(overall_progress, 1),
+        "all_done": all_done,
+        "jobs": job_statuses,
+    }
+
+
+@app.get("/api/batches/{batch_id}/download")
+async def download_batch(batch_id: str):
+    """Download all completed conversions as a single ZIP."""
+    if batch_id not in batches:
+        raise HTTPException(status_code=404, detail="Batch not found.")
+    batch = batches[batch_id]
+
+    # Build ZIP of all completed jobs
+    zip_dir = settings.output_dir / batch_id
+    zip_dir.mkdir(parents=True, exist_ok=True)
+    zip_path = zip_dir / "batch_results.zip"
+
+    with zipfile.ZipFile(zip_path, "w", zipfile.ZIP_DEFLATED) as zf:
+        for jid in batch["job_ids"]:
+            job = jobs.get(jid, {})
+            if job.get("status") != "complete":
+                continue
+            output_dir = Path(job["output_dir"])
+            # Add all files from the job output directory
+            if output_dir.exists():
+                for fpath in output_dir.iterdir():
+                    zf.write(fpath, f"{job['filename'].replace('.pdf','')}/{fpath.name}")
+
+    return FileResponse(
+        path=str(zip_path),
+        filename="pd2md_batch_results.zip",
+        media_type="application/zip",
+    )
 
 
 # ---------------------------------------------------------------------------

@@ -15,6 +15,11 @@ MONOSPACE_INDICATORS = [
     "source code", "jetbrains", "inconsolata", "droid sans mono",
     "liberation mono", "lucida console", "andale mono",
     "dejavu sans mono", "ubuntu mono", "noto mono",
+    # LaTeX / Computer Modern typewriter fonts
+    "cmtt", "typewriter",
+    # Additional modern monospace fonts
+    "fixedsys", "hack", "iosevka", "roboto mono", "sf mono",
+    "cascadia",
 ]
 
 # Known bold indicators in font names
