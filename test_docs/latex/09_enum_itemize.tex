@@ -1,0 +1,51 @@
+\documentclass[12pt]{article}
+\usepackage[margin=1in]{geometry}
+\usepackage{enumitem}
+\title{Various List Styles}
+\author{List Tester}
+\begin{document}
+\maketitle
+
+\section{Standard Bullet List}
+\begin{itemize}
+    \item Python is a versatile programming language
+    \item JavaScript dominates web development
+    \item Rust provides memory safety without garbage collection
+    \item Go excels at concurrent programming
+    \item TypeScript adds static typing to JavaScript
+\end{itemize}
+
+\section{Standard Numbered List}
+\begin{enumerate}
+    \item Gather requirements from stakeholders
+    \item Design the system architecture
+    \item Implement core functionality
+    \item Write comprehensive tests
+    \item Deploy to staging environment
+    \item Conduct user acceptance testing
+    \item Deploy to production
+\end{enumerate}
+
+\section{Description List}
+\begin{description}
+    \item[Extraction] Raw content pulled from PDF using PyMuPDF
+    \item[Assembly] Glyphs grouped into words, lines, and blocks
+    \item[Layout] Column detection, header/footer removal, reading order
+    \item[Semantics] Heading, list, and paragraph classification
+    \item[Tables] Structured cell extraction via pdfplumber
+    \item[Emission] Final Markdown text generation
+\end{description}
+
+\section{Custom Markers}
+\begin{itemize}[label=$\diamond$]
+    \item Diamond marker item one
+    \item Diamond marker item two
+    \item Diamond marker item three
+\end{itemize}
+
+\begin{enumerate}[label=\alph*)]
+    \item Alpha-labeled item
+    \item Beta-labeled item
+    \item Gamma-labeled item
+\end{enumerate}
+\end{document}

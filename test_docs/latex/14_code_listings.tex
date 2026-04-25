@@ -1,0 +1,69 @@
+\documentclass[12pt]{article}
+\usepackage[margin=1in]{geometry}
+\usepackage{listings}
+\usepackage{xcolor}
+\lstset{
+    basicstyle=\ttfamily\small,
+    numbers=left,
+    numberstyle=\tiny\color{gray},
+    frame=single,
+    breaklines=true,
+    keywordstyle=\color{blue},
+    commentstyle=\color{green!60!black},
+    stringstyle=\color{red},
+}
+\title{Code Listings Test}
+\author{Developer}
+\begin{document}
+\maketitle
+
+\section{Python Example}
+\begin{lstlisting}[language=Python]
+def fibonacci(n):
+    '''Calculate the nth Fibonacci number.'''
+    if n <= 1:
+        return n
+    a, b = 0, 1
+    for _ in range(2, n + 1):
+        a, b = b, a + b
+    return b
+
+# Print first 10 Fibonacci numbers
+for i in range(10):
+    print(f"F({i}) = {fibonacci(i)}")
+\end{lstlisting}
+
+\section{JavaScript Example}
+\begin{lstlisting}[language=JavaScript]
+async function fetchData(url) {
+    try {
+        const response = await fetch(url);
+        const data = await response.json();
+        return data;
+    } catch (error) {
+        console.error('Fetch failed:', error);
+        throw error;
+    }
+}
+\end{lstlisting}
+
+\section{Inline Code}
+Use the \texttt{pip install pd2md} command to install the package. Then run
+\texttt{pd2md convert input.pdf} to convert a file. The output will be saved
+to the \texttt{output/} directory by default.
+
+\section{Shell Commands}
+\begin{lstlisting}[language=bash]
+# Clone the repository
+git clone https://github.com/user/pd2md.git
+cd pd2md
+
+# Install dependencies
+python -m venv .venv
+source .venv/bin/activate
+pip install -e ".[dev]"
+
+# Run tests
+pytest backend/tests/ -v
+\end{lstlisting}
+\end{document}
