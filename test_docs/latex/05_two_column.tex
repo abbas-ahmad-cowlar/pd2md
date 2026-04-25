@@ -1,0 +1,43 @@
+\documentclass[12pt,twocolumn]{article}
+\usepackage[margin=0.75in]{geometry}
+\title{Two-Column Research Paper}
+\author{Dr.\ Robert Chen \and Dr.\ Maria Lopez}
+\date{2026}
+\begin{document}
+\maketitle
+
+\begin{abstract}
+This paper presents a two-column layout commonly used in academic publications.
+The converter should correctly identify column boundaries and reconstruct the
+reading order so that text flows from the left column to the right column on
+each page, not interleaving lines from both columns.
+\end{abstract}
+
+\section{Introduction}
+Academic papers frequently use two-column layouts to maximize information density
+on each page. This presents a challenge for PDF extraction because the converter
+must determine which text blocks belong to which column.
+
+The spatial analysis must consider the horizontal gap between columns as a
+separator. Text blocks on the left side of the gap should be read first, followed
+by text blocks on the right side.
+
+\section{Methodology}
+Our approach uses a vertical split-point detector. We analyze the distribution
+of text block x-coordinates and identify a gap region near the horizontal center
+of the page. Blocks to the left of this gap are assigned to column 1, and blocks
+to the right are assigned to column 2.
+
+Within each column, blocks are ordered top-to-bottom. The final reading order
+concatenates column 1 followed by column 2 for each page.
+
+\section{Results}
+Testing on 500 academic papers showed that our column detection achieves 97.3\%
+accuracy in correctly ordering text blocks. The most common failure case involves
+wide equations or figures that span both columns.
+
+\section{Conclusion}
+Two-column layout handling is essential for academic paper conversion. Our
+spatial analysis approach provides robust column detection without requiring
+machine learning or training data.
+\end{document}
