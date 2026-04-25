@@ -1,0 +1,49 @@
+\documentclass[12pt]{article}
+\usepackage[margin=1in]{geometry}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\title{Mathematical Content}
+\author{Math Department}
+\begin{document}
+\maketitle
+
+\section{Inline Mathematics}
+The quadratic formula is $x = \frac{-b \pm \sqrt{b^2 - 4ac}}{2a}$. Einstein's
+famous equation $E = mc^2$ relates energy and mass. The area of a circle with
+radius $r$ is $A = \pi r^2$.
+
+\section{Display Equations}
+The Gaussian integral:
+\begin{equation}
+\int_{-\infty}^{\infty} e^{-x^2} \, dx = \sqrt{\pi}
+\end{equation}
+
+Maxwell's equations in differential form:
+\begin{align}
+\nabla \cdot \mathbf{E} &= \frac{\rho}{\epsilon_0} \\
+\nabla \cdot \mathbf{B} &= 0 \\
+\nabla \times \mathbf{E} &= -\frac{\partial \mathbf{B}}{\partial t} \\
+\nabla \times \mathbf{B} &= \mu_0 \mathbf{J} + \mu_0 \epsilon_0 \frac{\partial \mathbf{E}}{\partial t}
+\end{align}
+
+\section{Matrix Notation}
+A 3x3 identity matrix:
+\begin{equation}
+I = \begin{pmatrix}
+1 & 0 & 0 \\
+0 & 1 & 0 \\
+0 & 0 & 1
+\end{pmatrix}
+\end{equation}
+
+\section{Summation and Limits}
+The Taylor series expansion:
+\begin{equation}
+e^x = \sum_{n=0}^{\infty} \frac{x^n}{n!} = 1 + x + \frac{x^2}{2!} + \frac{x^3}{3!} + \cdots
+\end{equation}
+
+The definition of a limit:
+\begin{equation}
+\lim_{x \to a} f(x) = L
+\end{equation}
+\end{document}

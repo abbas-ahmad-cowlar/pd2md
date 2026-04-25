@@ -1,0 +1,46 @@
+\documentclass[12pt]{article}
+\usepackage[margin=1in]{geometry}
+\title{Technical Glossary}
+\author{Documentation Team}
+\begin{document}
+\maketitle
+
+\section{Core Concepts}
+
+\begin{description}
+\item[Glyph] The smallest unit of text in a PDF. Represents a single character
+with position, font, and size metadata.
+
+\item[Content Block] A group of related text lines that form a logical unit such
+as a paragraph, heading, or list item.
+
+\item[Font Catalog] A registry of all fonts used in a document, including the
+identified body font and heading fonts.
+
+\item[Reading Order] The sequence in which content blocks should be read to
+reconstruct the logical flow of the document.
+
+\item[Intermediate Representation] The structured data model that connects all
+pipeline layers, containing blocks, their types, and metadata.
+\end{description}
+
+\section{Pipeline Stages}
+
+\begin{description}
+\item[Extraction] Layer 1. Raw PDF data retrieval using PyMuPDF.
+\item[Assembly] Layer 2. Character-to-block construction.
+\item[Layout Analysis] Layer 3. Spatial structure detection.
+\item[Semantic Analysis] Layer 4. Content type classification.
+\item[Table Extraction] Layer 5. Structured table recovery.
+\item[Emission] Layer 6. Markdown text generation.
+\end{description}
+
+\section{File Formats}
+
+\begin{description}
+\item[PDF] Portable Document Format. Page-oriented, position-based rendering.
+\item[Markdown] Lightweight semantic markup. Line-oriented, structure-based.
+\item[YAML] YAML Ain't Markup Language. Used for frontmatter metadata.
+\item[ZIP] Archive format for bundling Markdown output with extracted images.
+\end{description}
+\end{document}
