@@ -1,0 +1,49 @@
+\documentclass[12pt]{article}
+\usepackage[margin=1in]{geometry}
+\usepackage[colorlinks=true,linkcolor=blue,urlcolor=blue]{hyperref}
+\title{Hyperlinks and URLs}
+\author{Link Tester}
+\begin{document}
+\maketitle
+
+\section{Web Links}
+Visit the official Python website at \url{https://www.python.org} for the latest
+Python releases. The PyMuPDF documentation is available at
+\url{https://pymupdf.readthedocs.io}.
+
+\section{Named Links}
+For more information, see the \href{https://github.com/pymupdf/PyMuPDF}{PyMuPDF
+GitHub repository}. The \href{https://fastapi.tiangolo.com}{FastAPI documentation}
+provides excellent tutorials. You can also check the
+\href{https://pdfplumber.readthedocs.io}{pdfplumber documentation} for table
+extraction details.
+
+\section{Email Links}
+Contact the maintainer at \href{mailto:developer@example.com}{developer@example.com}
+for support questions.
+
+\section{Internal References}
+See Section~\ref{sec:conclusion} for the conclusion.
+See Table~\ref{tab:links} for a summary of all URLs.
+
+\begin{table}[h]
+\centering
+\caption{URL Reference Table}
+\label{tab:links}
+\begin{tabular}{|l|l|}
+\hline
+\textbf{Resource} & \textbf{URL} \\
+\hline
+Python & https://www.python.org \\
+PyMuPDF & https://pymupdf.readthedocs.io \\
+FastAPI & https://fastapi.tiangolo.com \\
+pdfplumber & https://pdfplumber.readthedocs.io \\
+\hline
+\end{tabular}
+\end{table}
+
+\section{Conclusion}
+\label{sec:conclusion}
+All hyperlinks should be preserved in the Markdown output using the standard
+link syntax: [text](url).
+\end{document}
