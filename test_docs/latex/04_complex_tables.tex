@@ -1,0 +1,60 @@
+\documentclass[12pt]{article}
+\usepackage[margin=1in]{geometry}
+\usepackage{booktabs}
+\usepackage{multirow}
+\title{Complex Table Structures}
+\author{Test Suite}
+\begin{document}
+\maketitle
+
+\section{Basic Table}
+\begin{table}[h]
+\centering
+\caption{Employee Directory}
+\begin{tabular}{|l|l|c|r|}
+\hline
+\textbf{Name} & \textbf{Department} & \textbf{Years} & \textbf{Salary} \\
+\hline
+Alice Johnson & Engineering & 5 & \$95,000 \\
+Bob Williams & Marketing & 3 & \$72,000 \\
+Carol Davis & Engineering & 8 & \$115,000 \\
+David Brown & Finance & 2 & \$68,000 \\
+Eve Wilson & Engineering & 6 & \$105,000 \\
+\hline
+\end{tabular}
+\end{table}
+
+\section{Booktabs Table}
+\begin{table}[h]
+\centering
+\caption{Benchmark Results}
+\begin{tabular}{lrrr}
+\toprule
+\textbf{Algorithm} & \textbf{Time (ms)} & \textbf{Memory (MB)} & \textbf{Accuracy} \\
+\midrule
+Linear Search & 1,245 & 12.3 & 100.0\% \\
+Binary Search & 8 & 12.3 & 100.0\% \\
+Hash Table & 3 & 45.7 & 100.0\% \\
+Neural Net & 156 & 234.5 & 98.7\% \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\section{Multi-row Table}
+\begin{table}[h]
+\centering
+\caption{Course Schedule}
+\begin{tabular}{|l|l|l|l|}
+\hline
+\textbf{Day} & \textbf{Time} & \textbf{Course} & \textbf{Room} \\
+\hline
+\multirow{2}{*}{Monday} & 9:00 AM & Mathematics & A101 \\
+ & 2:00 PM & Physics & B205 \\
+\hline
+\multirow{3}{*}{Wednesday} & 9:00 AM & Chemistry & C310 \\
+ & 11:00 AM & Biology & D102 \\
+ & 3:00 PM & Computer Science & E401 \\
+\hline
+\end{tabular}
+\end{table}
+\end{document}
