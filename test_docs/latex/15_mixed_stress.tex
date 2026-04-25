@@ -1,0 +1,48 @@
+\documentclass[12pt]{article}
+\usepackage[margin=1in]{geometry}
+\title{Mixed Formatting Stress Test}
+\author{QA Team}
+\begin{document}
+\maketitle
+
+\section{Paragraph with Everything}
+This paragraph has \textbf{bold text}, \textit{italic text}, \texttt{inline code},
+a reference to Section 2, and some numbers like 3.14159 and 2.71828. It also
+includes special characters: ampersand (\&), percent (5\%), dollar sign (\$100),
+and various punctuation marks: semicolons; colons: dashes --- and ellipses\ldots
+
+\section{Lists Followed by Paragraphs}
+Here is a list:
+\begin{itemize}
+    \item \textbf{Bold list item} with explanation text
+    \item \textit{Italic list item} with different formatting
+    \item \texttt{Code list item} showing a command
+\end{itemize}
+And now we continue with a regular paragraph that follows the list. The converter
+should correctly separate the list from this paragraph.
+
+\section{Table Followed by Text}
+\begin{table}[h]
+\centering
+\begin{tabular}{|l|r|}
+\hline
+\textbf{Metric} & \textbf{Value} \\
+\hline
+Precision & 94.2\% \\
+Recall & 91.7\% \\
+F1 Score & 92.9\% \\
+\hline
+\end{tabular}
+\end{table}
+The table above shows our evaluation metrics. As you can see, the system achieves
+high precision and recall across all test cases.
+
+\section{Multiple Paragraphs}
+First paragraph of this section. It contains multiple sentences that should be
+joined into a single paragraph in the Markdown output.
+
+Second paragraph of this section. This tests that paragraph breaks are correctly
+detected based on vertical spacing between text blocks.
+
+Third paragraph. Short but distinct from the previous paragraphs.
+\end{document}

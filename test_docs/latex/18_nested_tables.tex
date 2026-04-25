@@ -1,0 +1,59 @@
+\documentclass[12pt]{article}
+\usepackage[margin=1in]{geometry}
+\title{Multiple Tables}
+\author{Data Team}
+\begin{document}
+\maketitle
+
+\section{Server Configuration}
+\begin{table}[h]
+\centering
+\caption{Production Servers}
+\begin{tabular}{|l|c|r|l|}
+\hline
+\textbf{Server} & \textbf{CPU Cores} & \textbf{RAM (GB)} & \textbf{Role} \\
+\hline
+web-01 & 8 & 32 & Load Balancer \\
+web-02 & 16 & 64 & Application \\
+web-03 & 16 & 64 & Application \\
+db-01 & 32 & 128 & Primary DB \\
+db-02 & 32 & 128 & Replica DB \\
+cache-01 & 8 & 64 & Redis Cache \\
+\hline
+\end{tabular}
+\end{table}
+
+\section{API Endpoints}
+\begin{table}[h]
+\centering
+\caption{REST API Routes}
+\begin{tabular}{|l|l|l|l|}
+\hline
+\textbf{Method} & \textbf{Path} & \textbf{Description} & \textbf{Auth} \\
+\hline
+POST & /api/upload & Upload PDF file & API Key \\
+GET & /api/jobs/\{id\}/status & Check job status & API Key \\
+GET & /api/jobs/\{id\}/result & Download result & API Key \\
+GET & /api/health & Health check & None \\
+DELETE & /api/jobs/\{id\} & Cancel job & API Key \\
+\hline
+\end{tabular}
+\end{table}
+
+\section{Performance Metrics}
+\begin{table}[h]
+\centering
+\caption{Conversion Benchmarks by Document Type}
+\begin{tabular}{|l|r|r|r|r|}
+\hline
+\textbf{Document Type} & \textbf{Pages} & \textbf{Time (s)} & \textbf{Blocks} & \textbf{Score} \\
+\hline
+Simple Article & 2 & 0.3 & 12 & 98\% \\
+Technical Report & 15 & 2.1 & 89 & 95\% \\
+Academic Paper & 10 & 1.8 & 67 & 93\% \\
+Financial Report & 30 & 4.5 & 203 & 91\% \\
+User Manual & 50 & 7.2 & 412 & 89\% \\
+\hline
+\end{tabular}
+\end{table}
+\end{document}

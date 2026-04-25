@@ -1,0 +1,52 @@
+\documentclass[12pt]{article}
+\usepackage[margin=1in]{geometry}
+\usepackage{graphicx}
+\usepackage{float}
+\title{Document with Figures and Captions}
+\author{Visual Content Team}
+\begin{document}
+\maketitle
+
+\section{Introduction}
+This document tests the handling of figure environments and captions. While we
+cannot include actual images in this test LaTeX file without external assets,
+we test caption text extraction and figure numbering.
+
+\section{Results}
+
+\begin{figure}[H]
+\centering
+\rule{8cm}{5cm} % Placeholder rectangle
+\caption{Architecture diagram of the PD2MD conversion pipeline showing the six
+processing layers from extraction through emission.}
+\label{fig:architecture}
+\end{figure}
+
+The architecture shown in Figure~\ref{fig:architecture} demonstrates the modular
+design of our system. Each layer operates independently, communicating through
+a well-defined intermediate representation.
+
+\begin{figure}[H]
+\centering
+\rule{8cm}{4cm}
+\caption{Performance comparison across different PDF complexity levels. Simple
+documents convert in under 0.5 seconds, while complex multi-column layouts
+require up to 3.2 seconds.}
+\label{fig:performance}
+\end{figure}
+
+As shown in Figure~\ref{fig:performance}, performance scales linearly with
+document complexity for most cases.
+
+\begin{figure}[H]
+\centering
+\rule{6cm}{4cm}
+\caption{Error rate by document category. Academic papers (2.1\%), business
+reports (1.4\%), and technical manuals (3.7\%).}
+\label{fig:errors}
+\end{figure}
+
+\section{Discussion}
+The figure captions above should appear in the Markdown output. The converter
+should identify caption text and include it near the figure references.
+\end{document}

@@ -1,0 +1,54 @@
+\documentclass[12pt]{article}
+\usepackage[margin=1in]{geometry}
+\title{Nested List Structures}
+\author{Test Suite}
+\begin{document}
+\maketitle
+
+\section{Bullet Lists}
+\begin{itemize}
+    \item First level item A
+    \item First level item B
+    \begin{itemize}
+        \item Second level item B.1
+        \item Second level item B.2
+        \begin{itemize}
+            \item Third level item B.2.a
+            \item Third level item B.2.b
+        \end{itemize}
+        \item Second level item B.3
+    \end{itemize}
+    \item First level item C
+\end{itemize}
+
+\section{Numbered Lists}
+\begin{enumerate}
+    \item Install Python 3.12 or later
+    \item Create a virtual environment
+    \begin{enumerate}
+        \item Run: python -m venv .venv
+        \item Activate: source .venv/bin/activate
+    \end{enumerate}
+    \item Install dependencies
+    \begin{enumerate}
+        \item Core: pip install pymupdf pdfplumber
+        \item Dev: pip install pytest ruff
+    \end{enumerate}
+    \item Run the test suite
+    \item Deploy to production
+\end{enumerate}
+
+\section{Mixed Lists}
+\begin{itemize}
+    \item Unordered parent item
+    \begin{enumerate}
+        \item Ordered child 1
+        \item Ordered child 2
+    \end{enumerate}
+    \item Another unordered item
+    \begin{itemize}
+        \item Nested bullet A
+        \item Nested bullet B
+    \end{itemize}
+\end{itemize}
+\end{document}

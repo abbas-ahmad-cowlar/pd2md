@@ -1,0 +1,36 @@
+\documentclass[12pt]{article}
+\usepackage[margin=1in]{geometry}
+\usepackage{ulem}
+\title{Text Formatting Showcase}
+\author{Format Tester}
+\begin{document}
+\maketitle
+
+\section{Basic Formatting}
+This paragraph contains \textbf{bold text}, \textit{italic text}, and
+\underline{underlined text}. We can also combine them: \textbf{\textit{bold
+italic text}} is used for strong emphasis.
+
+\section{Monospace and Code}
+Inline code like \texttt{print("hello world")} should be wrapped in backticks.
+Variable names like \texttt{max\_value} and \texttt{user\_input} should preserve
+underscores correctly.
+
+\section{Font Sizes}
+{\tiny This is tiny text.}
+{\small This is small text.}
+{\normalsize This is normal text.}
+{\large This is large text.}
+{\Large This is Large text.}
+{\LARGE This is LARGE text.}
+
+\section{Text Styles}
+Here is \textsc{Small Caps Text} and here is \textsf{sans-serif text}.
+We also have \textsl{slanted text} which is similar to italic.
+
+\section{Mixed Formatting Paragraph}
+In this paragraph, we mix \textbf{bold words} with \textit{italic phrases} and
+some \texttt{code snippets} all in the same sentence. This tests whether the
+converter can correctly identify formatting spans within a single line of text
+and apply the appropriate Markdown markers without overlapping or nesting errors.
+\end{document}
