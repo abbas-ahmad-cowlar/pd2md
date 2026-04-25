@@ -1,0 +1,37 @@
+[project]
+name = "pd2md"
+version = "0.1.0"
+description = "Intelligent PDF to Markdown converter optimized for content accuracy"
+readme = "README.md"
+requires-python = ">=3.12"
+license = "AGPL-3.0-or-later"
+
+dependencies = [
+    "pymupdf>=1.25.0",
+    "pdfplumber>=0.11.0",
+    "fastapi>=0.115.0",
+    "uvicorn[standard]>=0.34.0",
+    "python-multipart>=0.0.20",
+    "aiofiles>=24.1.0",
+    "Pillow>=11.0.0",
+    "pydantic>=2.10.0",
+]
+
+[project.scripts]
+pd2md = "backend.app.cli:main"
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.3.0",
+    "pytest-asyncio>=0.25.0",
+    "httpx>=0.28.0",
+    "ruff>=0.8.0",
+]
+
+[tool.pytest.ini_options]
+testpaths = ["backend/tests"]
+asyncio_mode = "auto"
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
